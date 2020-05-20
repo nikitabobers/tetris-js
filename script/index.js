@@ -2,6 +2,7 @@
 const COLS = 10;
 const ROWS = 20;
 const BLOCK_SIZE = 30;
+const LINES_PER_LEVEL = 10;
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
@@ -15,6 +16,8 @@ context.scale(BLOCK_SIZE, BLOCK_SIZE);
 
 // Pieces properties
 let score = 0;
+let lines = 0;
+let level = 1;
 
 const createPiece = (type) => {
   if (type === "I") {
@@ -120,6 +123,7 @@ const pieceDrop = () => {
     pieceReset();
     boardSweep();
     updateScore();
+    updateLevel();
   }
   time.counter = 0;
 };
@@ -180,6 +184,7 @@ const pieceReset = () => {
       row.fill(0);
       score = 0;
       updateScore();
+      updateLevel();
     });
 };
 
@@ -236,13 +241,31 @@ const boardSweep = () => {
     const row = board.splice(y, 1)[0].fill(0);
     board.unshift(row);
     ++y;
+
+    // Count colapsed lines
+    lines++;
   }
+
+  // Update score
   score += rowCounter * 10;
   rowCounter *= 2;
 };
 
 const updateScore = () => {
   document.querySelector("#score").innerText = score;
+};
+const updateLevel = () => {
+  let levelStep = 50;
+  document.querySelector("#level").innerText = level;
+
+  // Maximum speed
+  if (time.interval < 100) return;
+
+  //Increase level speed
+  if (lines > LINES_PER_LEVEL) {
+    time.interval -= levelStep;
+    lines = 0;
+  }
 };
 
 // Move piece on key  press
