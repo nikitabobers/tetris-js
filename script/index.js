@@ -214,15 +214,18 @@ const pieceReset = () => {
     ((board[0].length / 2) | 0) - ((piece.shape[0].length / 2) | 0);
 
   // Clear board when game over
-  if (collide(board, piece))
+  if (collide(board, piece)) {
+    gameOver();
     board.forEach((row) => {
       row.fill(0);
       score = 0;
       updateScore();
       updateLevel();
     });
+  }
 };
 
+// Rotate piece
 const pieceRotate = (direction) => {
   const position = piece.position.x;
   let offset = 1;
@@ -241,7 +244,6 @@ const pieceRotate = (direction) => {
   }
 };
 
-// Rotate piece
 const rotate = (piece, direction) => {
   for (let y = 0; y < piece.length; ++y) {
     for (let x = 0; x < y; ++x) {
@@ -308,6 +310,16 @@ const updateLevel = () => {
   }
 };
 
+const gameOver = () => {
+  pause = !pause;
+  piece.shape === null;
+  pauseGame();
+  document.querySelector(".result-container").style.display = "initial";
+  document.querySelector(".result").innerHTML = score;
+  btnPlay.style.background = "#4caf50";
+  btnPlay.innerText = "Play Again";
+};
+
 // Pause game
 const pauseGame = () => {
   if (pause === true) {
@@ -325,7 +337,7 @@ const pauseGame = () => {
   }
 };
 
-// Move piece on key  press
+// Move piece on key press
 document.addEventListener("keydown", (e) => {
   if (pause !== true) {
     if (e.keyCode === 37) pieceMove(-1);

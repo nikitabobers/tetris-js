@@ -8,18 +8,48 @@
       href="https://fonts.googleapis.com/css?family=Press+Start+2P"
       rel="stylesheet"
     />
+    <script
+      src="https://kit.fontawesome.com/0634e71a94.js"
+      crossorigin="anonymous"
+    ></script>
     <link rel="stylesheet" href="style.css" type="text/css" media="all" />
   </head>
   <body>
     <div class="container">
       <div class="container-tetris">
-        <canvas id="canvas"></canvas>
+        <div class="gameBoard">
+          <canvas id="canvas"></canvas>
+          <p class="result-container">
+            <span class="gameOver">Game Over!</span> <br />
+            Your Score: <span class="result">0</span>
+          </p>
+        </div>
         <div class="menu">
           <div>
             <h2>Tetris</h2>
             <p>Level: <span id="level">1</span></p>
             <p>Score: <span id="score">0</span></p>
-            <canvas id="next"></canvas>
+            <div class="nextBox">
+              <p class="nextPiece">Next piece:</p>
+              <canvas id="next"></canvas>
+            </div>
+            <div class="instruction">
+              <small
+                ><i class="fas fa-long-arrow-alt-left fa-lg"></i> move
+                left</small
+              >
+              <small
+                ><i class="fas fa-long-arrow-alt-right fa-lg"></i> move
+                right</small
+              >
+              <small
+                ><i class="fas fa-long-arrow-alt-down fa-lg"></i> move
+                down</small
+              >
+              <small
+                ><i class="fas fa-long-arrow-alt-up fa-lg"></i> rotate</small
+              >
+            </div>
           </div>
           <button class="btn-play">Play</button>
         </div>
