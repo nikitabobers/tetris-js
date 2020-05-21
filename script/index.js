@@ -5,17 +5,21 @@ const BLOCK_SIZE = 30;
 const LINES_PER_LEVEL = 10;
 const BACKGROUND = "#222";
 
+const btnPlay = document.querySelector(".btn-play");
+
+// Main game board
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
+// Next piece board
 const canvasNext = document.getElementById("next");
 const contextNext = canvasNext.getContext("2d");
 
 // Calculate size of canvas
 context.canvas.width = COLS * BLOCK_SIZE;
 context.canvas.height = ROWS * BLOCK_SIZE;
-contextNext.canvas.width = 4 * BLOCK_SIZE;
-contextNext.canvas.height = 4 * BLOCK_SIZE;
+contextNext.canvas.width = 5 * BLOCK_SIZE;
+contextNext.canvas.height = 5 * BLOCK_SIZE;
 
 // Scale blocks
 context.scale(BLOCK_SIZE, BLOCK_SIZE);
@@ -25,6 +29,8 @@ contextNext.scale(BLOCK_SIZE, BLOCK_SIZE);
 let score = 0;
 let lines = 0;
 let level = 1;
+
+let pause = true;
 
 const createPiece = (type) => {
   if (type === "I") {
@@ -128,7 +134,7 @@ const draw = () => {
 
 // Create board grid
 const board = createGrid(COLS, ROWS);
-const boardNext = createGrid(6, 6);
+const boardNext = createGrid(7, 7);
 
 // Move piece down on update
 const pieceDrop = () => {
@@ -146,15 +152,21 @@ const pieceDrop = () => {
 
 // Update piece position every second
 const update = (timeNow = 0) => {
-  time.elapsed = timeNow - time.start;
+  if (pause !== true) {
+    time.elapsed = timeNow - time.start;
 
-  time.counter += time.elapsed;
-  if (time.counter > time.interval) pieceDrop();
+    time.counter += time.elapsed;
+    if (time.counter > time.interval) {
+      pieceDrop();
+    } else {
+      draw();
+    }
 
-  time.start = timeNow;
+    time.start = timeNow;
 
-  draw();
-  requestAnimationFrame(update);
+    draw();
+    requestAnimationFrame(update);
+  }
 };
 
 // Draw pieces
@@ -190,8 +202,6 @@ const pieceMove = (direction) => {
 const pieceReset = () => {
   const pieces = "ILJOTSZ";
   if (piece.next === null) {
-    console.log(contextNext);
-    console.log(context);
     piece.shape = createPiece(pieces[(pieces.length * Math.random()) | 0]);
     piece.next = createPiece(pieces[(pieces.length * Math.random()) | 0]);
   } else {
@@ -231,6 +241,7 @@ const pieceRotate = (direction) => {
   }
 };
 
+// Rotate piece
 const rotate = (piece, direction) => {
   for (let y = 0; y < piece.length; ++y) {
     for (let x = 0; x < y; ++x) {
@@ -244,7 +255,7 @@ const rotate = (piece, direction) => {
   }
 };
 
-// Bottom border
+// Stop pieces at bottom
 const freeze = (board, piece) => {
   piece.shape.forEach((row, y) => {
     row.forEach((value, x) => {
@@ -255,6 +266,7 @@ const freeze = (board, piece) => {
   });
 };
 
+// Delete filled line
 const boardSweep = () => {
   let rowCounter = 1;
   outer: for (let y = board.length - 1; y > 0; --y) {
@@ -279,6 +291,8 @@ const boardSweep = () => {
 const updateScore = () => {
   document.querySelector("#score").innerText = score;
 };
+
+// Update level when lines count is more than 10
 const updateLevel = () => {
   let levelStep = 10;
   document.querySelector("#level").innerText = level;
@@ -294,17 +308,40 @@ const updateLevel = () => {
   }
 };
 
+// Pause game
+const pauseGame = () => {
+  if (pause === true) {
+    btnPlay.style.background = "#4caf50";
+    btnPlay.innerText = "Play";
+  } else {
+    btnPlay.style.background = "#e6e600";
+    btnPlay.innerText = "Pause";
+
+    // Continue game
+    if (piece.shape === null) {
+      pieceReset();
+    }
+    update();
+  }
+};
+
 // Move piece on key  press
 document.addEventListener("keydown", (e) => {
-  if (e.keyCode === 37) pieceMove(-1);
-  if (e.keyCode === 39) pieceMove(1);
-  if (e.keyCode === 40) {
-    pieceDrop();
-  }
-  if (e.keyCode === 38) {
-    pieceRotate(1);
+  if (pause !== true) {
+    if (e.keyCode === 37) pieceMove(-1);
+    if (e.keyCode === 39) pieceMove(1);
+    if (e.keyCode === 40) {
+      pieceDrop();
+    }
+    if (e.keyCode === 38) {
+      pieceRotate(1);
+    }
   }
 });
 
-pieceReset();
-update();
+// Start/Pause game button
+btnPlay.addEventListener("click", () => {
+  pause = !pause;
+  console.log(pause);
+  pauseGame();
+});
