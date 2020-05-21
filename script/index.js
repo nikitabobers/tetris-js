@@ -3,16 +3,23 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK_SIZE = 30;
 const LINES_PER_LEVEL = 10;
+const BACKGROUND = "#222";
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
+const canvasNext = document.getElementById("next");
+const contextNext = canvasNext.getContext("2d");
+
 // Calculate size of canvas
 context.canvas.width = COLS * BLOCK_SIZE;
 context.canvas.height = ROWS * BLOCK_SIZE;
+contextNext.canvas.width = 4 * BLOCK_SIZE;
+contextNext.canvas.height = 4 * BLOCK_SIZE;
 
 // Scale blocks
 context.scale(BLOCK_SIZE, BLOCK_SIZE);
+contextNext.scale(BLOCK_SIZE, BLOCK_SIZE);
 
 // Pieces properties
 let score = 0;
@@ -74,6 +81,7 @@ const createPiece = (type) => {
 const piece = {
   position: { x: 0, y: 0 },
   shape: null,
+  next: null,
 };
 
 // Time variables
@@ -103,16 +111,24 @@ const createGrid = (width, height) => {
   return grid;
 };
 
+// DrawNext
+const drawNext = () => {
+  contextNext.fillStyle = BACKGROUND;
+  contextNext.fillRect(0, 0, canvas.width, canvas.height);
+  drawPiece(boardNext, { x: 0, y: 0 }, contextNext);
+  drawPiece(piece.next, { x: 1, y: 1 }, contextNext);
+};
 // Draw
 const draw = () => {
-  context.fillStyle = "#222";
-  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-  drawPiece(board, { x: 0, y: 0 });
-  drawPiece(piece.shape, piece.position);
+  context.fillStyle = BACKGROUND;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawPiece(board, { x: 0, y: 0 }, context);
+  drawPiece(piece.shape, piece.position, context);
 };
 
 // Create board grid
 const board = createGrid(COLS, ROWS);
+const boardNext = createGrid(6, 6);
 
 // Move piece down on update
 const pieceDrop = () => {
@@ -142,15 +158,15 @@ const update = (timeNow = 0) => {
 };
 
 // Draw pieces
-const drawPiece = (piece, offset) =>
+const drawPiece = (piece, offset, ctx) =>
   piece.forEach((row, y) =>
     row.forEach((value, x) => {
       if (value !== 0) {
-        context.fillStyle = colors[value];
-        context.fillRect(x + offset.x, y + offset.y, 1, 1);
-        context.strokeStyle = "#fff";
-        context.lineWidth = 0.05;
-        context.strokeRect(x + offset.x, y + offset.y, 1, 1);
+        ctx.fillStyle = colors[value];
+        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 0.05;
+        ctx.strokeRect(x + offset.x, y + offset.y, 1, 1);
       }
     })
   );
@@ -173,7 +189,16 @@ const pieceMove = (direction) => {
 
 const pieceReset = () => {
   const pieces = "ILJOTSZ";
-  piece.shape = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+  if (piece.next === null) {
+    console.log(contextNext);
+    console.log(context);
+    piece.shape = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+    piece.next = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+  } else {
+    piece.shape = piece.next;
+    piece.next = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+  }
+  drawNext();
   piece.position.y = 0;
   piece.position.x =
     ((board[0].length / 2) | 0) - ((piece.shape[0].length / 2) | 0);
@@ -244,18 +269,18 @@ const boardSweep = () => {
 
     // Count colapsed lines
     lines++;
-  }
 
-  // Update score
-  score += rowCounter * 10;
-  rowCounter *= 2;
+    // Update score
+    score += rowCounter * 10;
+    rowCounter *= 2;
+  }
 };
 
 const updateScore = () => {
   document.querySelector("#score").innerText = score;
 };
 const updateLevel = () => {
-  let levelStep = 50;
+  let levelStep = 10;
   document.querySelector("#level").innerText = level;
 
   // Maximum speed
@@ -264,6 +289,7 @@ const updateLevel = () => {
   //Increase level speed
   if (lines > LINES_PER_LEVEL) {
     time.interval -= levelStep;
+    level++;
     lines = 0;
   }
 };
