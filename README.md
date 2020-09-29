@@ -1,4 +1,4 @@
-### Tetris gamme
+### Tetris game
 
 https://nikitabobers.github.io/tetris-js/
 
